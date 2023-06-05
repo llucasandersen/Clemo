@@ -216,7 +216,7 @@ var Epsile = new function () {
 			chatArea.value = "";
 			chatArea.focus();
 			chatMainDiv.innerHTML = "";
-			logChat(0, "Waiting for a stranger..");
+			logChat(0, "Waiting for a student..");
 			setTyping(false);
 			disconnectType = false;
 			disconnectButton.value = "Disconnect";
