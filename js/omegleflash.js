@@ -1,3 +1,4 @@
+// Vbucks
 var splitDomain=document.domain.split(".");
 if(splitDomain.length>1){
 	document.domain=splitDomain[splitDomain.length-2]+"."+splitDomain[splitDomain.length-1]
