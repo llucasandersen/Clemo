@@ -1,43 +1,20 @@
-epsile - an anonymous one-to-one chat
-====
+An omegle clone written in javascript for CHS to make friends.
+Clemo Clemo is an Omegle clone written in JavaScript, designed to help users make friends and engage in random text-based conversations. This README.md file provides an overview of Clemo's features, installation instructions, and licensing information.
 
-epsile got it name from epsilon, and it's an open-source clone of Omegle. It's using a node.js express+socket.io combo as server backend.
+Features Clemo comes with the following features:
 
-Demo
----
-http://djazz.se:8001/
+Random Text-Based Chat: Users can connect with strangers and engage in anonymous text-based conversations.
 
-Installation
----
-When you have cloned this repository, install express and socket.io like so:
-```
-$ npm install express socket.io
-```
-Then run the server:
-```
-$ node epsile-server
-```
+Interest Matching: Users can specify their interests, and Clemo will attempt to match them with other users who have similar interests, enhancing the likelihood of finding meaningful conversations.
 
-Features
----
-Compared to Omegle, epsile isn't close to it in features
-* You can chat with another stranger. If there is no other stranger you'll have to wait.
-* If you don't have the tab focused you'll get a popup if someone sends you a message.
-* URLs in chat messages are clickable, and opens in a new tab when clicked. Don't click on links from strangers you don't trust!
-* If you start your message with "/me " you will send an action. An example is if you write "/me ate a cookie" it will look like "*** Stranger ate a cookie" for the stranger.
+Chat History: Clemo retains a chat history, allowing users to refer back to their previous conversations.
 
-TODO
----
-In no particular order:
-* Add interests (see how Omegle does it)
-* Add Omegle integration (chat with a stranger from Omegle inside epsile)
-* Add custom styling/other themes (light/dark for example)
-* Add question mode (discuss a topic with other strangers)
-* Add collaboration features, like a simple drawing surface that both strangers can draw on
-* Add webcam and voice support (it will most likely not happen)
-* Better URL matching
-* Audio notification & title notification
+Message Filters: Clemo includes filters to prevent the sharing of inappropriate content and maintain a safe chatting environment.
 
-License
----
-GNU General Public License V3
+Typing Indicator: Users are provided with a visual indicator when the other person is typing a response, enhancing the chat experience.
+
+User Disconnect Detection: Clemo detects and handles situations when a user unexpectedly disconnects from the chat.
+
+License Clemo is released under the MIT License. You can find the full text of the license in the LICENSE file.
+
+Disclaimer Clemo is an open-source project and should be used responsibly. It is your responsibility to ensure that you comply with all relevant laws and regulations while using Clemo. The developers of Clemo are not responsible for any misuse or consequences resulting from the use of this application.
