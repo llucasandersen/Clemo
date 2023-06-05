@@ -54,13 +54,13 @@ var Epsile = new function () {
 
 		socket.on('connect', function () {
 			chatMainDiv.innerHTML = "";
-			logChat(0, "Waiting for a stranger..");
+			logChat(0, "Waiting for a Student..");
 			setTyping(false);
 		});
 
 		socket.on('conn', function () { // Connected
 			chatMainDiv.innerHTML = "";
-			logChat(0, "You are now chatting with a random stranger. Say hi!");
+			logChat(0, "You are now chatting with a random Student. Say hi what grade are you in!");
 			disconnectButton.disabled = false;
 			disconnectButton.value = "Disconnect";
 			chatArea.disabled = false;
@@ -80,7 +80,7 @@ var Epsile = new function () {
 					logChat(0, "You disconnected.");
 					break;
 				case 2:
-					logChat(0, "Stranger disconnected.");
+					logChat(0, "Student disconnected.");
 					if (reason) {
 						logChat(0, "Reason: "+reason);
 					}
@@ -91,7 +91,7 @@ var Epsile = new function () {
 			setTyping(false);
 			disconnectType = true;
 			disconnectButton.disabled = false;
-			//logChat(-1, "<input type=button value='Start a new chat' onclick='Epsile.newStranger();'>");
+			logChat(-1, "<input type=button value='Start a new chat' onclick='Epsile.newStranger();'>");
 			disconnectButton.value = "New";
 			chatArea.disabled = true;
 			chatArea.focus();
