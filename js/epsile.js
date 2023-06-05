@@ -29,7 +29,7 @@ var Epsile = new function () {
 	var url_pattern = /https?:\/\/([-\w\.]+)+(:\d+)?(\/([\w/_\.]*(\?\S+)?)?)?/;
 
 	// mute the notification sound
-	alertSound.volume = 0.0;
+	alertSound.volume = 20.0;
 	
 	function setTyping(state) {
 		if(state) {
