@@ -16,7 +16,7 @@ server.listen(port, function () {
 	console.log('epsile server listening at port %d', port);
 });
 
-app.use(express.compress());
+//app.use(express.compress());
 app.use(express.static(__dirname + '/'));
 
 io.set('log level', 1);
