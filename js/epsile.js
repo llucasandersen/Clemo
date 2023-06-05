@@ -183,7 +183,7 @@ var Epsile = new function () {
 			if(firstNotify && notify > 0 && window.webkitNotifications.checkPermission() === 0) {
 				clearTimeout(notifyTimer);
 				if(lastNotify) lastNotify.cancel();
-				lastNotify = window.webkitNotifications.createNotification('img/epsile_logo32.png', 'Epsile'+(type===0?' Message':''), who2+message2);
+				lastNotify = window.webkitNotifications.createNotification('img/clemo_logo32.png', 'Clemo'+(type===0?' Message':''), who2+message2);
 				lastNotify.show();
 				firstNotify = false;
 				notifyTimer = setTimeout(function () {
