@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// epsile server
-// created by djazz
+// Clemo server
+// created by Lucas
 'use strict';
 
 // config
@@ -10,16 +10,16 @@ var port = 8001;
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
-var io = require('socket.io').listen(server);
+var io = require('socket.io')(server);
 
 server.listen(port, function () {
-	console.log('epsile server listening at port %d', port);
+	console.log('Clemo server listening at port %d', port);
 });
 
 //app.use(express.compress());
 app.use(express.static(__dirname + '/'));
 
-io.set('log level', 1);
+
 
 // global variables, keeps the state of the app
 var sockets = {},
@@ -117,7 +117,7 @@ io.sockets.on('connection', function (socket) {
 	socket.on("disconnect", function (err) {
 		
 		// Someone disconnected, ctoed or was kicked
-		//console.log(timestamp(), socket.id+" disconnected");
+		console.log(timestamp(), socket.id+" disconnected");
 
 		var connTo = (users[socket.id] && users[socket.id].connectedTo);
 		if (connTo === undefined) {
