@@ -7,7 +7,6 @@ var Epsile = new function () {
 	var domID = function (id) {return document.getElementById(id);};
 	var socket;
 	var welcomeScreen = domID('welcomeScreen');
-	const fs = require("fs");
 	var chatWindow = domID('chatWindow');
 	var chatMain = domID('chatMain');
 	var chatMainDiv = domID('chatMainDiv');
@@ -24,7 +23,6 @@ var Epsile = new function () {
 	var alertSound = domID('alertSound');
 	var isBlurred = false;
 	var notify = 0;
-	let chatNumber = 0;
 	var firstNotify = true;
 	var lastNotify = null;
 	var notifyTimer = null;
@@ -126,9 +124,15 @@ var Epsile = new function () {
 			disconnectButton.disabled = true;
 			setTyping(false);
 			disconnectType = false;
-			const filename = `chat${chatNumber}.csv`;
-  			fs.writeFileSync(filename, message);
-  			chatNumber++;
+			// Create CSV file
+			var csvContent = "data:text/csv;charset=utf-8,";
+			csvContent += chatMainDiv.innerHTML;
+			var encodedUri = encodeURI(csvContent);
+			var link = document.createElement("a");
+			link.setAttribute("href", encodedUri);
+			link.setAttribute("download", "chat" + (chatNumber++) + ".csv");
+			document.body.appendChild(link); // Required for FF
+			link.click();
 		});
 		socket.on('error', function (e) {
 			logChat(0, "Connection error");
