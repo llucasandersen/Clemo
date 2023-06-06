@@ -1,22 +1,46 @@
+// LESS stylesheet
+
 html, body {
 	width: 100%;
 	height: 100%;
 	padding: 0px;
 	margin: 0px;
-	background: linear-gradient(to bottom, #FFFF80, #FFCC00);
+	background-color: #111;
 	color: white;
 	font-size: 14px;
-	font-family: "Comic Sans MS", cursive, sans-serif;
+	font-family: Helvetica, sans-serif;
 	overflow: hidden;
 }
 
+a {
+	color: #0AF;
+	&:hover {
+		color: #3CF;
+	}
+	img {
+		border: none;
+	}
+}
+
 header {
-	background: linear-gradient(to bottom, #333, #111);
+	background-color: #333;
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#333), to(#111));
+	background-image: -moz-linear-gradient(top, #333, #111);
+	background-image: linear-gradient(top, #333, #111);
 	border-bottom: 3px solid #101;
 	height: 60px;
 	width: 100%;
 	display: block;
 	position: absolute;
+
+	#logo {
+		width: 183px;
+		height: 79px;
+		position: relative;
+		top: -10px;
+		left: 0px;
+		background-image: url('../img/Clemo_text.png');
+	}
 }
 
 footer {
@@ -24,6 +48,13 @@ footer {
 	bottom: 0px;
 	padding: 4px;
 	font-size: 13px;
+
+	a {
+		color: #747;
+		&:hover {
+			color: #979;
+		}
+	}
 }
 
 ::selection {
@@ -310,4 +341,3 @@ textarea:focus {
 		cursor: default;
 	}
 }
-
