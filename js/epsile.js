@@ -29,7 +29,7 @@ var Epsile = new function () {
 	var url_pattern = /https?:\/\/([-\w\.]+)+(:\d+)?(\/([\w/_\.]*(\?\S+)?)?)?/;
 
 	// mute the notification sound
-	alertSound.volume = 20.0;
+	alertSound.volume = 0.0;
 	
 	function setTyping(state) {
 		if(state) {
@@ -60,7 +60,7 @@ var Epsile = new function () {
 
 		socket.on('conn', function () { // Connected
 			chatMainDiv.innerHTML = "";
-			logChat(0, "You are now chatting with a random Student. Say Hi what grade are you in!");
+			logChat(0, "You are now chatting with a random Student. Say hi what grade are you in!");
 			disconnectButton.disabled = false;
 			disconnectButton.value = "Disconnect";
 			chatArea.disabled = false;
@@ -216,7 +216,7 @@ var Epsile = new function () {
 			chatArea.value = "";
 			chatArea.focus();
 			chatMainDiv.innerHTML = "";
-			logChat(0, "Waiting for a student..");
+			logChat(0, "Waiting for a stranger..");
 			setTyping(false);
 			disconnectType = false;
 			disconnectButton.value = "Disconnect";
@@ -321,7 +321,6 @@ var Epsile = new function () {
 		}
 	}, false);
 };
-
 
 
 
