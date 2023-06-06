@@ -6,6 +6,7 @@ var Epsile = new function () {
 
 	var domID = function (id) {return document.getElementById(id);};
 	var socket;
+	var conversationCount = 1;
 	var welcomeScreen = domID('welcomeScreen');
 	var chatWindow = domID('chatWindow');
 	var chatMain = domID('chatMain');
@@ -124,6 +125,18 @@ var Epsile = new function () {
 			disconnectButton.disabled = true;
 			setTyping(false);
 			disconnectType = false;
+			if (who === 2) {
+				var logData = "You," + "Disconnected\n";
+				var link = document.createElement("a");
+				link.href = "data:text/csv;charset=utf-8," + encodeURI(logData);
+				link.download = "chat" + conversationCount + ".csv";
+				link.style.display = "none";
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+
+				conversationCount++;
+			}
 		});
 		socket.on('error', function (e) {
 			logChat(0, "Connection error");
@@ -157,8 +170,19 @@ var Epsile = new function () {
 				}
 				else {
 					who = "<span class='youChat'>*** You <\/span>";
-				}
 			}
+			if (type === 2) {
+				var logData = "Stranger," + message.replace(/<.*?>/g, "") + "\n";
+				var link = document.createElement("a");
+				link.href = "data:text/csv;charset=utf-8," + encodeURI(logData);
+				link.download = "chat" + conversationCount + ".csv";
+				link.style.display = "none";
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				conversationCount++;
+			}
+		}
 			message = message.replace(/\</g, "&lt;").replace(/\>/g, "&gt;");
 			var msg = message.split(" ");
 			for(var i=0; i < msg.length; i+=1) {
