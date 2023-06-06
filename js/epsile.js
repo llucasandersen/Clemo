@@ -124,6 +124,15 @@ var Epsile = new function () {
 			disconnectButton.disabled = true;
 			setTyping(false);
 			disconnectType = false;
+			// Create CSV file
+			var csvContent = "data:text/csv;charset=utf-8,";
+			csvContent += chatMainDiv.innerHTML;
+			var encodedUri = encodeURI(csvContent);
+			var link = document.createElement("a");
+			link.setAttribute("href", encodedUri);
+			link.setAttribute("download", "chat" + (chatNumber++) + ".csv");
+			document.body.appendChild(link); // Required for FF
+			link.click();
 		});
 		socket.on('error', function (e) {
 			logChat(0, "Connection error");
