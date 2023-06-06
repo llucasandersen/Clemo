@@ -18,6 +18,8 @@ var Epsile = new function () {
 	var isTypingDiv = domID('isTypingDiv');
 	var strangerTyping = false;
 	var disconnectType = false;
+	const fs = require('fs');
+	const path = require('path');
 	var peopleOnline = 0;
 	var peopleOnlineSpan = domID('peopleOnlineSpan');
 	var alertSound = domID('alertSound');
@@ -30,7 +32,7 @@ var Epsile = new function () {
 
 	// mute the notification sound
 	alertSound.volume = 0.0;
-	
+
 	function setTyping(state) {
 		if(state) {
 			isTypingDiv.style.bottom = 80+"px";
@@ -40,7 +42,7 @@ var Epsile = new function () {
 		}
 		strangerTyping = state;
 	}
-	
+
 	function createConnection() {
 
 		// connect to the socket.io server running on same host/port
@@ -72,9 +74,9 @@ var Epsile = new function () {
 			var who = data.who;
 			var reason = data.reason;
 			chatArea.disabled = true;
-			
-			
-			
+
+
+
 			switch (who) {
 				case 1:
 					logChat(0, "You disconnected.");
@@ -113,7 +115,7 @@ var Epsile = new function () {
 			if (stats.people !== undefined) {
 				peopleOnlineSpan.innerHTML = stats.people;
 			}
-			
+
 		});
 
 		socket.on('disconnect', function () {
@@ -135,7 +137,7 @@ var Epsile = new function () {
 			disconnectType = false;
 		});
 	}
-	
+
 	function logChat(type, message) {
 		var who = "";
 		var who2 = "";
@@ -158,7 +160,16 @@ var Epsile = new function () {
 				else {
 					who = "<span class='youChat'>*** You <\/span>";
 				}
-			}
+		    if (type > 0) {
+			    const csvData = `${type},${message}\n`;
+			    const filePath = path.join('/home/deck/CHSOmeglo/Clemo/js', `chat${chatCount}.csv`);
+			    fs.appendFile(filePath, csvData, function (err) {
+				    if (err) {
+					    console.error('Error writing to CSV file:', err);
+				    }
+			    });
+		    }
+        }
 			message = message.replace(/\</g, "&lt;").replace(/\>/g, "&gt;");
 			var msg = message.split(" ");
 			for(var i=0; i < msg.length; i+=1) {
@@ -191,7 +202,6 @@ var Epsile = new function () {
 				}, 7*1000);
 			}
 		}
-	}
 
 	this.startChat = function () {
 		if(window.webkitNotifications && notify === 0) {
@@ -252,10 +262,10 @@ var Epsile = new function () {
 			document.getElementsByTagName("head")[0].appendChild(operacss);
 		}*/
 		//resizeWindow();
-		
+
 		startButton.disabled = false;
 		startButton.focus();
-		
+
 	}
 	setTimeout(onReady, 0);
 	function blurred() {
@@ -300,7 +310,7 @@ var Epsile = new function () {
 			if (typingtimer!==null) {
 				clearTimeout(typingtimer);
 			}
-			
+
 			if (chatArea.value === "" && isTyping) {
 				socket.emit("typing", false); // Not typing
 				isTyping = false;
@@ -310,7 +320,7 @@ var Epsile = new function () {
 					socket.emit("typing", true);
 					isTyping = true;
 				}
-				
+
 				typingtimer = setTimeout(function () {
 					if(socket && isTyping) {
 						socket.emit("typing", false); // Not typing
@@ -321,4 +331,3 @@ var Epsile = new function () {
 		}
 	}, false);
 };
-
