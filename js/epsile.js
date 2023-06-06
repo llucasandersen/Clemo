@@ -1,332 +1,184 @@
-// clemo
+#!/usr/bin/env node
+// Clemo server
 // created by Lucas
+'use strict';
 
-var Epsile = new function () {
-	'use strict';
+// config
+var port = 8001;
 
-	var domID = function (id) {return document.getElementById(id);};
-	var socket;
-	var welcomeScreen = domID('welcomeScreen');
-	var chatWindow = domID('chatWindow');
-	var chatMain = domID('chatMain');
-	var chatMainDiv = domID('chatMainDiv');
-	var chatArea = domID('chatArea');
-	var disconnectButton = domID('disconnectButton');
-	var startButton = domID('startButton');
-	var typingtimer = null;
-	var isTyping = false;
-	var isTypingDiv = domID('isTypingDiv');
-	var strangerTyping = false;
-	var disconnectType = false;
-	var peopleOnline = 0;
-	var peopleOnlineSpan = domID('peopleOnlineSpan');
-	var alertSound = domID('alertSound');
-	var isBlurred = false;
-	var notify = 0;
-	var firstNotify = true;
-	var lastNotify = null;
-	var notifyTimer = null;
-	var url_pattern = /https?:\/\/([-\w\.]+)+(:\d+)?(\/([\w/_\.]*(\?\S+)?)?)?/;
+// load and initialize modules
+var express = require('express');
+var app = express();
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+const fs = require('fs');
 
-	// mute the notification sound
-	alertSound.volume = 0.0;
+server.listen(port, function () {
+	console.log('Clemo server listening at port %d', port);
+});
+
+//app.use(express.compress());
+app.use(express.static(__dirname + '/'));
+
+
+
+// global variables, keeps the state of the app
+var sockets = {},
+	users = {},
+	strangerQueue = false,
+	peopleActive = 0,
+	peopleTotal = 0;
+
+// helper functions, for logging
+function fillZero (val) {
+	if (val > 9) return ""+val;
+	return "0"+val;
+}
+function timestamp () {
+	var now = new Date();
+	return "["+fillZero(now.getHours())+":"+fillZero(now.getMinutes())+":"+fillZero(now.getSeconds())+"]";
+}
+
+// listen for connections
+io.sockets.on('connection', function (socket) {
 	
-	function setTyping(state) {
-		if(state) {
-			isTypingDiv.style.bottom = 80+"px";
-		}
-		else {
-			isTypingDiv.style.bottom = (80-isTypingDiv.offsetHeight)+"px";
-		}
-		strangerTyping = state;
-	}
-	
-	function createConnection() {
-
-		// connect to the socket.io server running on same host/port
-		socket = io.connect(null, {
-			reconnect: false,
-			'force new connection': true
-		});
-
-		chatMainDiv.innerHTML = "";
-		logChat(0, "Connecting to server...");
-
-		socket.on('connect', function () {
-			chatMainDiv.innerHTML = "";
-			logChat(0, "Waiting for a Student..");
-			setTyping(false);
-		});
-
-		socket.on('conn', function () { // Connected
-			chatMainDiv.innerHTML = "";
-			logChat(0, "You are now chatting with a random Student. Say hi what grade are you in!");
-			disconnectButton.disabled = false;
-			disconnectButton.value = "Disconnect";
-			chatArea.disabled = false;
-			chatArea.value = "";
-			chatArea.focus();
-		});
-
-		socket.on('disconn', function (data) {
-			var who = data.who;
-			var reason = data.reason;
-			chatArea.disabled = true;
-			
-			
-			
-			switch (who) {
-				case 1:
-					logChat(0, "You disconnected.");
-					break;
-				case 2:
-					logChat(0, "Student disconnected.");
-					if (reason) {
-						logChat(0, "Reason: "+reason);
-					}
-					break;
-			}
-			clearTimeout(typingtimer);
-			isTyping = false;
-			setTyping(false);
-			disconnectType = true;
-			disconnectButton.disabled = false;
-			logChat(-1, "<input type=button value='Start a new chat' onclick='Epsile.newStranger();'>");
-			disconnectButton.value = "New";
-			chatArea.disabled = true;
-			chatArea.focus();
-		});
-
-		socket.on('chat', function (message) {
-			logChat(2, message);
-			alertSound.currentTime = 0;
-			if (isBlurred) {
-				//alertSound.play();
-			}
-		});
-
-		socket.on('typing', function (state) {
-			setTyping(state);
-		});
-
-		socket.on('stats', function (stats) {
-			if (stats.people !== undefined) {
-				peopleOnlineSpan.innerHTML = stats.people;
-			}
-			
-		});
-
-		socket.on('disconnect', function () {
-			logChat(0, "Connection imploded");
-			logChat(-1, "<input type=button value='Reconnect' onclick='Epsile.startChat();'>");
-			peopleOnlineSpan.innerHTML = "0";
-			chatArea.disabled = true;
-			disconnectButton.disabled = true;
-			setTyping(false);
-			disconnectType = false;
-			// Create CSV file
-			var csvContent = "data:text/csv;charset=utf-8,";
-			csvContent += chatMainDiv.innerHTML;
-			var encodedUri = encodeURI(csvContent);
-			var link = document.createElement("a");
-			link.setAttribute("href", encodedUri);
-			link.setAttribute("download", "chat" + (chatNumber++) + ".csv");
-			document.body.appendChild(link); // Required for FF
-			link.click();
-		});
-		socket.on('error', function (e) {
-			logChat(0, "Connection error");
-			logChat(-1, "<input type=button value='Reconnect' onclick='Epsile.startChat();'>");
-			peopleOnlineSpan.innerHTML = "0";
-			chatArea.disabled = true;
-			disconnectButton.disabled = true;
-			setTyping(false);
-			disconnectType = false;
-		});
-	}
-	
-	function logChat(type, message) {
-		var who = "";
-		var who2 = "";
-		var message2 = message;
-		var node = document.createElement("div");
-		if(type > 0) {
-			if(type===2) {
-				who = "<span class='strangerChat'>Stranger: <\/span>";
-				who2 = "Stranger: ";
-			}
-			else {
-				who = "<span class='youChat'>You: <\/span>";
-			}
-			if(message.substr(0, 4)==='/me ') {
-				message = message.substr(4);
-				if(type===2) {
-					who = "<span class='strangerChat'>*** Stranger <\/span>";
-					who2 = "*** Stranger ";
-				}
-				else {
-					who = "<span class='youChat'>*** You <\/span>";
-				}
-			}
-			message = message.replace(/\</g, "&lt;").replace(/\>/g, "&gt;");
-			var msg = message.split(" ");
-			for(var i=0; i < msg.length; i+=1) {
-				if(url_pattern.test(msg[i]) && msg[i].indexOf("\"") === -1) {
-					msg[i] = "<a href=\""+msg[i].replace(/\n/g, "")+"\" target=\"_blank\">"+msg[i].replace(/\n/g, "<br>")+"</a>";
-				}
-				else {
-					msg[i] = msg[i].replace(/\n/g, "<br>");
-				}
-			}
-			message = msg.join(" ");
-			node.innerHTML = who + message;
-		}
-		else {
-			node.innerHTML = "<span class='consoleChat'>"+message+"<\/span>";
-		}
-		chatMainDiv.appendChild(node);
-		chatMain.scrollTop = chatMain.scrollHeight;
-		chatMain.scrollLeft = 0;
-		if(isBlurred && (type === 0 || type === 2)) {
-			alertSound.play();
-			if(firstNotify && notify > 0 && window.webkitNotifications.checkPermission() === 0) {
-				clearTimeout(notifyTimer);
-				if(lastNotify) lastNotify.cancel();
-				lastNotify = window.webkitNotifications.createNotification('img/clemo_logo32.png', 'Clemo'+(type===0?' Message':''), who2+message2);
-				lastNotify.show();
-				firstNotify = false;
-				notifyTimer = setTimeout(function () {
-					lastNotify.cancel();
-				}, 7*1000);
-			}
-		}
-	}
-
-	this.startChat = function () {
-		if(window.webkitNotifications && notify === 0) {
-			if(window.webkitNotifications.checkPermission() === 0) {
-				notify = 2;
-			}
-			else {
-				window.webkitNotifications.requestPermission();
-				notify = 1;
-			}
-		}
-		welcomeScreen.style.display = 'none';
-		chatWindow.style.display = 'block';
-		createConnection();
+	// store the socket and info about the user
+	sockets[socket.id] = socket;
+	users[socket.id] = {
+		connectedTo: -1,
+		isTyping: false
 	};
 
-	this.newStranger = function () {
-		if(socket) {
-			chatArea.disabled = true;
-			disconnectButton.disabled = true;
-			socket.emit("new");
-			chatArea.value = "";
-			chatArea.focus();
-			chatMainDiv.innerHTML = "";
-			logChat(0, "Waiting for a stranger..");
-			setTyping(false);
-			disconnectType = false;
-			disconnectButton.value = "Disconnect";
-		}
-	};
-
-	this.doDisconnect = function () {
-		if(disconnectType===true) {
-			disconnectType = false;
-			disconnectButton.value = "Disconnect";
-			Epsile.newStranger();
-		}
-		else if(socket) {
-			socket.emit("disconn");
-			chatArea.disabled = true;
-			chatArea.focus();
-			disconnectType = true;
-			disconnectButton.disabled = true;
-			disconnectButton.value = "Disconnect";
-		}
-	};
-
-	/*function resizeWindow() {
-		//chatMain.style.height = (window.innerHeight-70-20)+"px";
-		chatArea.style.width = (window.innerWidth-94)+"px";
-	}*/
-
-	function onReady() {
-		/*if (window.opera) {
-			var operacss = document.createElement("link");
-			operacss.setAttribute("rel", "stylesheet");
-			operacss.setAttribute("href", "opera.css");
-			document.getElementsByTagName("head")[0].appendChild(operacss);
-		}*/
-		//resizeWindow();
+	// connect the user to another if strangerQueue isn't empty
+	if (strangerQueue !== false) {
+		users[socket.id].connectedTo = strangerQueue;
+		users[socket.id].isTyping = false;
+		users[strangerQueue].connectedTo = socket.id;
+		users[strangerQueue].isTyping = false;
+		socket.emit('conn');
+		sockets[strangerQueue].emit('conn');
+		strangerQueue = false;
 		
-		startButton.disabled = false;
-		startButton.focus();
+	} else {
+		strangerQueue = socket.id;
+	}
+
+	peopleActive++;
+	peopleTotal++;
+	console.log(timestamp(), peopleTotal, "connect");
+	io.sockets.emit('stats', {people: peopleActive});
+
+	socket.on("new", function () {
 		
-	}
-	setTimeout(onReady, 0);
-	function blurred() {
-		isBlurred = true;
-		firstNotify = true;
-	}
-	function focused() {
-		isBlurred = false;
-		if(lastNotify) lastNotify.cancel();
-		if(notifyTimer) clearTimeout(notifyTimer);
-	}
-	//window.addEventListener("resize", resizeWindow, false);
-	//window.addEventListener("load", onReady, false);
-	window.addEventListener("blur", blurred, false);
-	window.addEventListener("focus", focused, false);
-	disconnectButton.addEventListener('click', this.doDisconnect, false);
-	chatArea.addEventListener("keypress", function (e) {
-		var kc = e.keyCode;
-		if(kc === 13) {
-			if(!e.shiftKey) {
-				var msg = chatArea.value;
-				if(msg.length > 0) {
-					if(typingtimer!==null) {
-						clearTimeout(typingtimer);
-					}
-					if(isTyping) {
-						socket.emit("typing", false); // Not typing
-					}
-					isTyping = false;
-					socket.emit("chat", msg);
-					logChat(1, msg);
-					chatArea.value = "";
-				}
-				e.preventDefault();
-				e.returnValue = false;
-				return false;
-			}
+		// Got data from someone
+		if (strangerQueue !== false) {
+			users[socket.id].connectedTo = strangerQueue;
+			users[strangerQueue].connectedTo = socket.id;
+			users[socket.id].isTyping = false;
+			users[strangerQueue].isTyping = false;
+			socket.emit('conn');
+			sockets[strangerQueue].emit('conn');
+			strangerQueue = false;
+		} else {
+			strangerQueue = socket.id;
 		}
-	}, false);
-	chatArea.addEventListener("keyup", function (e) {
-		if (socket) {
-			if (typingtimer!==null) {
-				clearTimeout(typingtimer);
-			}
-			
-			if (chatArea.value === "" && isTyping) {
-				socket.emit("typing", false); // Not typing
-				isTyping = false;
-			}
-			else {
-				if (!isTyping && chatArea.value.length > 0) {
-					socket.emit("typing", true);
-					isTyping = true;
-				}
-				
-				typingtimer = setTimeout(function () {
-					if(socket && isTyping) {
-						socket.emit("typing", false); // Not typing
-					}
-					isTyping = false;
-				}, 10*1000);
-			}
+		peopleActive++;
+		io.sockets.emit('stats', {people: peopleActive});
+	});
+	
+	// Conversation ended
+	socket.on("disconn", function () {
+		var connTo = users[socket.id].connectedTo;
+		if (strangerQueue === socket.id || strangerQueue === connTo) {
+			strangerQueue = false;
 		}
-	}, false);
-};
+		users[socket.id].connectedTo = -1;
+		users[socket.id].isTyping = false;
+		if (sockets[connTo]) {
+			users[connTo].connectedTo = -1;
+			users[connTo].isTyping = false;
+			sockets[connTo].emit("disconn", {who: 2});
+		}
+		socket.emit("disconn", {who: 1});
+		peopleActive -= 2;
+		io.sockets.emit('stats', {people: peopleActive});
+	});
+	socket.on('chat', function (message) {
+		if (users[socket.id].connectedTo !== -1 && sockets[users[socket.id].connectedTo]) {
+			sockets[users[socket.id].connectedTo].emit('chat', message);
+			console.log(users[socket.id], message);
+			console.log(`Address: ${socket.handshake.address}, Time: ${socket.handshake.time}, User-Agent: ${socket.handshake.headers['user-agent']}`);
+			const data = [
+			{
+				address: socket.handshake.address,
+				time: socket.handshake.time,
+				userAgent: socket.handshake.headers['user-agent'],
+				Logmessage: message
+			}
+			];
+			const csvData = data.map(obj => Object.values(obj).join(',')).join('\n');
+
+			const filePath = '/home/deck/CHSOmeglo/Clemo/Chat.csv';
+			const filePath2 = '/home/deck/CHSOmeglo/Clemo/messages.csv';
+
+			fs.appendFile(filePath, csvData, 'utf8', (err) => {
+				if (err) {
+					console.error('The CSV file failed to write lol (You re bad at coding)', err);
+				} else {
+					console.log('Data Added baby!');
+				}
+			});
+			const data2 = [
+			{
+				logmessage: message,
+				Address: socket.handshake.address
+			}
+			];
+			const csvData2 = data2.map(obj => Object.values(obj).join(',')).join('\n');
+
+			fs.appendFile(filePath2, csvData2, 'utf8', (err) => {
+				if (err) {
+					console.error('The CSV file failed to write lol (You re bad at coding)', err);
+				} else {
+					console.log('Messages Added Baby!');
+				}
+			})
+
+		}
+	});
+	socket.on('typing', function (isTyping) {
+		if (users[socket.id].connectedTo !== -1 && sockets[users[socket.id].connectedTo] && users[socket.id].isTyping !== isTyping) {
+			users[socket.id].isTyping = isTyping;
+			sockets[users[socket.id].connectedTo].emit('typing', isTyping);
+		}
+	});
+
+	socket.on("disconnect", function (err) {
+		
+		// Someone disconnected, ctoed or was kicked
+		console.log(timestamp(), socket.id+" disconnected");
+
+		var connTo = (users[socket.id] && users[socket.id].connectedTo);
+		if (connTo === undefined) {
+			connTo = -1;
+		}
+		if (connTo !== -1 && sockets[connTo]) {
+			sockets[connTo].emit("disconn", {who: 2, reason: err && err.toString()});
+			users[connTo].connectedTo = -1;
+			users[connTo].isTyping = false;
+			peopleActive -= 2;
+		}
+
+		delete sockets[socket.id];
+		delete users[socket.id];
+
+		if (strangerQueue === socket.id || strangerQueue === connTo) {
+			strangerQueue = false;
+			peopleActive--;
+		}
+		peopleTotal--;
+		console.log(timestamp(), peopleTotal, "disconnect");
+		io.sockets.emit('stats', {people: peopleActive});
+		
+	});
+});
