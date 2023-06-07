@@ -11,6 +11,8 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
+const fs = require('fs');
+var chatnumber = 0
 
 server.listen(port, function () {
 	console.log('Clemo server listening at port %d', port);
@@ -18,6 +20,7 @@ server.listen(port, function () {
 
 //app.use(express.compress());
 app.use(express.static(__dirname + '/'));
+
 
 
 
@@ -105,6 +108,45 @@ io.sockets.on('connection', function (socket) {
 	socket.on('chat', function (message) {
 		if (users[socket.id].connectedTo !== -1 && sockets[users[socket.id].connectedTo]) {
 			sockets[users[socket.id].connectedTo].emit('chat', message);
+			console.log(users[socket.id], message);
+			console.log(`Address: ${socket.handshake.address}, Time: ${socket.handshake.time}, User-Agent: ${socket.handshake.headers['user-agent']}`);
+			const data = [
+			{
+				address: socket.handshake.address,
+				time: socket.handshake.time,
+				userAgent: socket.handshake.headers['user-agent'],
+				Logmessage: message
+			}
+			];
+			const csvData = data.map((obj, index) => Object.values({ ...obj, LineNumber: index + 1 }).join(',')).join('\n');
+
+			const filePath = '/home/deck/CHSOmeglo/Clemo/Chat.csv';
+			const filePath2 = '/home/deck/CHSOmeglo/Clemo/messages.csv';
+
+			fs.appendFile(filePath, csvData, 'utf8', (err) => {
+				if (err) {
+					console.error('The CSV file failed to write lol (You re bad at coding)', err);
+				} else {
+					console.log('Data Added baby!');
+				}
+			});
+			const data2 = [
+			{
+				Chatnumber: chatnumber,
+				logmessage: message,
+			}
+			];
+			const csvData2 = data2.map((obj, index) => Object.values({ ...obj, LineNumber: index + 1 }).join(',')).join('\n');
+
+			fs.appendFile(filePath2, csvData2, 'utf8', (err) => {
+				if (err) {
+					console.error('The CSV file failed to write lol (You re bad at coding)', err);
+				} else {
+					console.log('Messages Added Baby!');
+					chatnumber++
+				}
+			})
+
 		}
 	});
 	socket.on('typing', function (isTyping) {
