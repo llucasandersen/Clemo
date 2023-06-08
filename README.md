@@ -1,5 +1,5 @@
 An omegle clone written in javascript for CHS to make friends.
-Clemo Clemo is an Omegle clone written in JavaScript, designed to help users make friends and engage in random text-based conversations. This README.md file provides an overview of Clemo's features, installation instructions, and licensing information.
+Clemo is an Omegle clone written in JavaScript, designed to help users make friends and engage in random text-based conversations. This README.md file provides an overview of Clemo's features, installation instructions, and licensing information.
 
 Features Clemo comes with the following features:
 
