@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Clemo: Connect, Chat, Swap!</title>
+	<link rel="icon" type="image/png" href="img/clemo_logo16.png">
+	<link rel="stylesheet/less" type="text/css" href="style/epsile.less">
+	<script>
+		var less = {
+			env: "development"
+		};
+	</script>
+	<script src="js/lib/less-1.7.0.min.js"></script>
+	<style>
+		html.dark-mode {
+			background-color: #222;
+			color: #FFF;
+		}
+
+		html.dark-mode a {
+			color: #FFF;
+		}
+
+		html.dark-mode #repo,
+		html.dark-mode #copy {
+			color: #FFF;
+		}
+		html.dark-mode #credit {
+			color: #000
+		}
+
+
+		html.dark-mode #chatWindow {
+			background-color: #333;
+			color: #FFF;
+		}
+
+		html.dark-mode #chatArea,
+		html.dark-mode #isTypingDiv,
+		html.dark-mode #chatMainDiv {
+			background-color: #111;
+			color: #FFF;
+		}
+
+		html.dark-mode #darkModeButton {
+			background-color: #FFF;
+			color: #000;
+		}
+
+		html.dark-mode #darkModeButton:hover {
+			background-color: #DDD;
+		}
+
+		#credit {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			color: #c97f24;
+		}
+
+		#repo {
+			position: absolute;
+			bottom: 10px;
+			left: 10px;
+			color: white;
+		}
+
+		#repo a {
+			color: white;
+		}
+
+		#copy {
+			position: absolute;
+			bottom: 10px;
+			right: 10px;
+			color: #000;
+			font-size: 12px;
+		}
+
+		#darkModeButton {
+			position: absolute;
+			top: 3%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background-color: #000;
+			color: #FFF;
+			padding: 8px 12px;
+			border-radius: 4px;
+			cursor: pointer;
+		}
+
+		#darkModeButton:hover {
+			background-color: #222;
+		}
+	</style>
+</head>
+<body>
+<section id="container">
+	<section id="chatWindow">
+		<section id="chatMain">
+			<div id="chatMainDiv"></div>
+		</section>
+
+		<div id="isTypingDiv" class="consoleChat">Student&nbsp;is&nbsp;typing...</div>
+
+		<section id="panelRow">
+
+			<input type="button" value="Disconnect" id="disconnectButton" disabled>
+			<div id="chatAreaWrap">
+				<textarea id="chatArea" disabled="disabled"></textarea>
+			</div>
+		</section>
+
+		<section id="peopleOnlineSection">
+			<span id="peopleOnlineSpan">0</span> online
+		</section>
+	</section>
+
+	<section id="welcomeScreen">
+
+		<section id="startButtonDiv">
+			<div>
+				<div id="description">
+					Clemo is a program I created over the summer, inspired by Omegle but specifically tailored for Clebune High school. <br>
+					The rules for the website can be found <a href="https://docs.google.com/document/d/1V03Sgsclf8aitoxsV6vPKBtV40fa539W9IoAdqU8OB8/edit?usp=sharing" target="_blank">here</a>. <br>
+					In Clemo, all chats are anonymous unless users choose to describe themselves. <br>
+					It provides a platform for students to engage in anonymous conversations, encouraging open discussions and honest interactions. <br>
+					idea sharing, and support within the Clebune High school community.
+				</div>
+				<br>
+				<input type="button" value="Start chatting!" onclick="Epsile.startChat();" class="button" id="startButton" disabled>
+			</div>
+		</section>
+
+		<header>
+			<a href="./">
+				<div id="logo"></div>
+			</a>
+		</header>
+		<div id="credit">Programmed by Lucas Andersen<span style="color: #FF8C00;"></span></div>
+		<div id="repo">The GitHub repo is <a href="https://github.com/llucasandersen/Clemo">here</a></div>
+		<div id="copy">© Lucas Andersen 2023</div>
+		<button id="darkModeButton">Toggle Dark Mode</button>
+	</section>
+</section>
+
+<audio id="alertSound">
+	<source src="media/alert.ogg" />
+	<source src="media/alert.mp3" />
+</audio>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/epsile.js"></script>
+<script>
+	const darkModeButton = document.getElementById("darkModeButton");
+	const htmlBody = document.querySelector("html, body");
+
+	darkModeButton.addEventListener("click", function() {
+	  htmlBody.classList.toggle("dark-mode");
+	});
+</script>
+</body>
+</html>
